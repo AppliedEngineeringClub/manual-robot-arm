@@ -128,10 +128,10 @@ def poll_keyboard():
     return {
         "left": keys[pygame.K_LEFT],
         "right": keys[pygame.K_RIGHT],
-        "up": keys[pygame.K_UP],
-        "down": keys[pygame.K_DOWN],
-        "grow": keys[pygame.K_z],
-        "shrink": keys[pygame.K_x],
+        "forward": keys[pygame.K_UP],
+        "backward": keys[pygame.K_DOWN],
+        "up": keys[pygame.K_z],
+        "down": keys[pygame.K_x],
     }
 ```
 
@@ -148,15 +148,15 @@ def update(state, controls):
         dot.x -= config.DOT_SPEED
     if controls["right"]:
         dot.x += config.DOT_SPEED
-    if controls["up"]:
+    if controls["forward"]:
         dot.y -= config.DOT_SPEED
-    if controls["down"]:
+    if controls["backward"]:
         dot.y += config.DOT_SPEED
 
     ##checks to see if z or x are pressed to go "up or down"
-    if controls["grow"]:
+    if controls["up"]:
         dot.radius = min(config.DOT_RADIUS_MAX, dot.radius + config.DOT_RADIUS_STEP)
-    if controls["shrink"]:
+    if controls["down"]:
         dot.radius = max(config.DOT_RADIUS_MIN, dot.radius - config.DOT_RADIUS_STEP)
 
     ##keep dot within window bounds
