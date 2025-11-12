@@ -48,3 +48,4 @@ A 640×400 black window should appear. Use the arrow keys to move the red dot. C
   Run `source .venv/bin/activate` from the project directory and confirm your shell prompt shows `(.venv)`.
 
 
+
