@@ -29,6 +29,11 @@ class App:
         ##sets up and down "speed" 3rd dimension
         self.radius_step = 1
 
+        ##create clock to limit FPS movement
+        self.clock = pygame.time.Clock()
+        self.position_speed = 10
+        self.radius_speed = 1
+
     def on_init(self):
         pygame.init()
         self._display_surf = pygame.display.set_mode(self.size, pygame.HWSURFACE | pygame.DOUBLEBUF)
@@ -43,7 +48,9 @@ class App:
     ##checks for continuous input
     def on_loop(self):
         ##continuous movement when using keyboard arrows. creates boolean values for each arrow key. True if pressed.
-        ##implement code in chatgpt during next meeting. 
+        ##implement code in chatgpt during next meeting.
+
+        dt = self.clock.tick(60) / 1000 #caps at 60 FPS, convert to seconds 
         keys = pygame.key.get_pressed()
 
         ##move dot left right, forward and backward by checking key press
