@@ -4,6 +4,7 @@
 - Transform the current Pygame demo into a control station for the manual robot arm.
 - Stream directional/size inputs to an ESP32 over Bluetooth to drive actuators.
 - Preserve a smooth user experience while maintaining safe motion limits.
+- Visualize claw actuation with a secondary dot in the lower-right corner controlled by the `A` (open) and `S` (close) keys.
 
 ## 2. Current State
 - `pygame-window.py` renders a red dot and maps keyboard controls to continuous movement and size changes.
