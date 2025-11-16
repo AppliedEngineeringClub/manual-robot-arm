@@ -2,7 +2,7 @@
 import pygame
 from ball_struct import FloatingBall, RobotClaw
 from render import render_ball
-from input import get_input
+from ball_input import get_input
 
 def main():
     pygame.init()
@@ -10,7 +10,7 @@ def main():
     clock = pygame.time.Clock()
 
     ball = FloatingBall(320, 200)
-    claw = RobotClaw(500, 200)
+    claw = RobotClaw(500, 300)
 
     running = True
     while running:
