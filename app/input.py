@@ -17,3 +17,8 @@ def get_input():
         dy = 1
 
     return dx, dy
+
+grow = keys[pygame.K_z]
+    shrink = keys[pygame.K_x]
+
+    return dx, dy, grow, shrink
