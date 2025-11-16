@@ -1,6 +1,6 @@
 # main.py
 import pygame
-from struct import FloatingBall, RobotClaw
+from ball_struct import FloatingBall, RobotClaw
 from render import render_ball
 from input import get_input
 
