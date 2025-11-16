@@ -49,3 +49,13 @@ A 640×400 black window should appear. Use the arrow keys to move the red dot. C
 
 
 
+  [pygame visual]
+    ↓
+FloatingBall (x, y)  ---->  kinematics / positioning  ---->  joint_targets
+RobotClaw (radius)   ---->  claw modeling / mapping   ---->  claw_opening
+    ↓                                                        ↓
+                    Raspberry Pi I/O layer (PWM/GPIO)
+
+
+
+
