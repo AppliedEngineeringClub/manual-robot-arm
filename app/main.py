@@ -1,6 +1,6 @@
 # main.py
 import pygame
-from struct import FloatingBall
+from struct import FloatingBall, RobotClaw
 from render import render_ball
 from input import get_input
 
@@ -10,6 +10,7 @@ def main():
     clock = pygame.time.Clock()
 
     ball = FloatingBall(320, 200)
+    claw = RobotClaw(500, 200)
 
     running = True
     while running:
@@ -17,11 +18,18 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        dx, dy = get_input()
+        dx, dy, grow, shrink = get_input()
+
         ball.move(dx, dy)
 
+        if grow:
+            claw.grow()
+        if shrink:
+            claw.shrink()
+
         screen.fill((0, 0, 0))
-        render_ball(screen, ball)
+        render_ball(screen, ball, (255, 0, 0))
+        render_ball(screen, claw, (0, 150, 255))  # bluish claw
 
         pygame.display.flip()
         clock.tick(60)
@@ -30,4 +38,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
