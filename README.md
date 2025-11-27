@@ -29,12 +29,19 @@ pip install pygame
 ## Run the demo
 
 ```bash
-python3 pygame-window.py
-# or, if executable:
-./pygame-window.py
+cd app
+python3 main.py
 ```
 
-A 640×400 black window should appear. Use the arrow keys to move the red dot. Close the window or press `Ctrl+C` in the terminal to exit.
+A 640×400 black window should appear with:
+- A **red ball** that you can move with the arrow keys (↑ ↓ ← →)
+- A **blue claw** in the lower-right corner that you can control with:
+  - `Z` key to grow (open)
+  - `X` key to shrink (close)
+
+Close the window or press `Ctrl+C` in the terminal to exit.
+
+**Note:** The old `pygame-window.py` file exists but is currently unused. The main entry point is now `app/main.py`.
 
 ## Troubleshooting
 
