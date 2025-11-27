@@ -7,7 +7,9 @@
 - Visualize claw actuation with a secondary dot in the lower-right corner controlled by the `A` (open) and `S` (close) keys.
 
 ## 2. Current State
-- `pygame-window.py` renders a red dot and maps keyboard controls to continuous movement and size changes.
+- The codebase has been restructured from the original modular design (`app/app.py`, `app/config.py`, etc.) into a simpler structure with focused modules.
+- Current structure: `app/main.py` (game loop), `app/ball_input.py` (input handling), `app/ball_struct.py` (data structures: FloatingBall and RobotClaw), and `app/render.py` (rendering).
+- `pygame-window.py` still exists but is currently unused; the main entry point is now `app/main.py`.
 - No networking layer, data protocol, or firmware exists yet to control the physical arm.
 - Repository is now tracked on GitHub at `AppliedEngineeringClub/manual-robot-arm`.
 
@@ -64,184 +66,27 @@
 | Safety violations (over-rotation) | Apply clamping in both UI and firmware; include emergency stop |
 | Latency spikes causing jitter | Buffer commands, implement smoothing on ESP32 |
 
-## 7. Next Actions
+## 7. Current File Structure & Ownership
+
+After restructuring, the codebase uses a simplified module structure. The following table maps current files to their responsibilities and original owners from the previous modular design.
+
+| Current File | Purpose | Owner (from previous structure) | Notes |
+| --- | --- | --- | --- |
+| `app/main.py` | Main game loop, initialization, event handling | **Vince** (was `app/app.py`) | Coordinates all modules and manages the pygame event loop |
+| `app/ball_input.py` | Keyboard input polling and translation | **Richard** (was `app/input.py`) | Handles arrow keys and claw controls (Z/X keys) |
+| `app/ball_struct.py` | Data structures (FloatingBall, RobotClaw) | **Anderson** (was `app/state.py`) | Contains state classes and movement/growth logic |
+| `app/render.py` | Drawing functions for rendering game objects | **Nicole** (was `app/renderer.py`) | Renders balls and claws to the screen |
+
+**Note:** The previous `app/config.py` (was J/Julian's) and `app/controller.py` (was Justin's) modules were removed during restructuring. Configuration values are now inline, and controller logic is integrated into the state classes in `ball_struct.py`.
+
+## 8. Next Actions
 1. Choose the Bluetooth library and draft a minimal messaging prototype.
-2. Define the command data model and document it in `/docs/`.
-3. Set up an ESP32 sandbox project that can receive and echo commands.
+4. Define the command data model and document it in `/docs/`.
+5. Set up an ESP32 sandbox project that can receive and echo commands.
 
-## Appendix A – Splitting `pygame-window.py`
-The current UI works as a single file, but refactoring it into focused modules will improve readability and testing. Follow the steps below and keep the code style (comments, naming) consistent with the existing implementation.
+## Appendix A – Previous Modularization Plan (Historical Reference)
 
-### Step-by-step order
-1. **Create the package shell** – add `app/__init__.py`.
-2. **Extract constants** – move window/dot constants into `app/config.py`.
-3. **Add shared state objects** – create `app/state.py`.
-4. **Extract keyboard polling** – add `app/input.py`.
-5. **Extract movement logic** – add `app/controller.py`.
-6. **Extract rendering** – add `app/renderer.py`.
-7. **Move the `App` class** – place the loop inside `app/app.py`.
-8. **Trim the entry point** – keep `pygame-window.py` as the launcher only.
-9. Run `python3 pygame-window.py` after each step to verify nothing regresses.
+**Note:** This section documents the original modularization plan that was implemented, then restructured by Justin. It is kept for historical reference but does not reflect the current codebase structure.
 
-### `app/config.py`
-```python
-##holds global configuration values for pygame window
-WINDOW_WIDTH = 640
-WINDOW_HEIGHT = 400
-FPS_CAP = 60
-
-##dot styling and movement defaults
-DOT_COLOR = (255, 0, 0)
-DOT_RADIUS_START = 10
-DOT_RADIUS_MIN = 2
-DOT_RADIUS_MAX = 40
-DOT_SPEED = 5
-DOT_RADIUS_STEP = 1
-```
-
-### `app/state.py`
-```python
-##lightweight containers for application state
-from app import config
-
-class DotState:
-    def __init__(self):
-        self.x = config.WINDOW_WIDTH // 2
-        self.y = config.WINDOW_HEIGHT // 2
-        self.color = config.DOT_COLOR
-        self.radius = config.DOT_RADIUS_START
-
-class AppState:
-    def __init__(self):
-        self.running = True
-        self.clock = None
-        self.surface = None
-        self.dot = DotState()
-```
-
-### `app/input.py`
-```python
-##wraps pygame keyboard polling so it can be reused or swapped later
-import pygame
-
-def poll_keyboard():
-    keys = pygame.key.get_pressed()
-    return {
-        "left": keys[pygame.K_LEFT],
-        "right": keys[pygame.K_RIGHT],
-        "forward": keys[pygame.K_UP],
-        "backward": keys[pygame.K_DOWN],
-        "up": keys[pygame.K_z],
-        "down": keys[pygame.K_x],
-    }
-```
-
-### `app/controller.py`
-```python
-##updates dot position and size based on input flags
-from app import config
-
-def update(state, controls):
-    dot = state.dot
-
-    ##move dot left right, forward and backward by checking key press
-    if controls["left"]:
-        dot.x -= config.DOT_SPEED
-    if controls["right"]:
-        dot.x += config.DOT_SPEED
-    if controls["forward"]:
-        dot.y -= config.DOT_SPEED
-    if controls["backward"]:
-        dot.y += config.DOT_SPEED
-
-    ##checks to see if z or x are pressed to go "up or down"
-    if controls["up"]:
-        dot.radius = min(config.DOT_RADIUS_MAX, dot.radius + config.DOT_RADIUS_STEP)
-    if controls["down"]:
-        dot.radius = max(config.DOT_RADIUS_MIN, dot.radius - config.DOT_RADIUS_STEP)
-
-    ##keep dot within window bounds
-    dot.x = min(config.WINDOW_WIDTH - dot.radius, max(dot.radius, dot.x))
-    dot.y = min(config.WINDOW_HEIGHT - dot.radius, max(dot.radius, dot.y))
-```
-
-### `app/renderer.py`
-```python
-##draws the current frame
-import pygame
-
-def render(state):
-    surface = state.surface
-    dot = state.dot
-
-    ##Clears previous frame every time dot moves
-    surface.fill((0, 0, 0))
-
-    ##Draws red dot at new position
-    pygame.draw.circle(surface, dot.color, (dot.x, dot.y), dot.radius)
-
-    ##Updates display to show new dot position
-    pygame.display.flip()
-```
-
-### `app/app.py`
-```python
-##high level application loop built from smaller modules
-import pygame
-from pygame.locals import HWSURFACE, DOUBLEBUF
-
-from app import config, state, input, controller, renderer
-
-class App:
-    def __init__(self):
-        self.state = state.AppState()
-
-    def on_init(self):
-        pygame.init()
-        self.state.surface = pygame.display.set_mode(
-            (config.WINDOW_WIDTH, config.WINDOW_HEIGHT),
-            HWSURFACE | DOUBLEBUF
-        )
-        self.state.clock = pygame.time.Clock()
-        self.state.running = True
-
-    def on_event(self, event):
-        if event.type == pygame.QUIT:
-            self.state.running = False
-
-    def on_loop(self):
-        dt = self.state.clock.tick(config.FPS_CAP) / 1000
-        controls = input.poll_keyboard()
-        controller.update(self.state, controls)
-
-    def on_render(self):
-        renderer.render(self.state)
-
-    def on_execute(self):
-        if self.on_init() is False:
-            self.state.running = False
-
-        while self.state.running:
-            for event in pygame.event.get():
-                self.on_event(event)
-            self.on_loop()
-            self.on_render()
-
-        pygame.quit()
-```
-
-### Updated `pygame-window.py`
-```python
-#!/usr/bin/env python3
-
-import sys
-from app.app import App
-
-if __name__ == "__main__":
-    theApp = App()
-    theApp.on_execute()
-    sys.exit(0)
-```
-
-> **Reminder:** only the plan was updated here. When you implement the split, apply the snippets above to their respective files in the stated order.
+The original plan split `pygame-window.py` into focused modules: `app/app.py`, `app/config.py`, `app/state.py`, `app/input.py`, `app/controller.py`, and `app/renderer.py`. However, the codebase was later restructured into a simpler design with fewer files. See Section 7 for the current file structure and ownership.
 
